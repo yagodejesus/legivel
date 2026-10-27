@@ -1,0 +1,43 @@
+name: "Legível — Linguagem Simples"
+description: "Verifica legibilidade (Flesch adaptado ao português) e Linguagem Simples em arquivos Markdown e texto."
+author: "Yago de Jesus Martins"
+branding:
+  icon: "book-open"
+  color: "green"
+inputs:
+  arquivos:
+    description: "Arquivos ou padrões glob (ex.: 'docs/**/*.md')"
+    required: true
+    default: "**/*.md"
+  min-flesch:
+    description: "Índice de Flesch mínimo (vazio = sem mínimo)"
+    required: false
+    default: ""
+  falhar-em:
+    description: "Gravidade que faz o job falhar: alta, media, baixa ou nunca"
+    required: false
+    default: "alta"
+  ignorar:
+    description: "Regras a ignorar, separadas por vírgula"
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - shell: bash
+      run: pip install --quiet "$GITHUB_ACTION_PATH"
+    - shell: bash
+      env:
+        ARQUIVOS: ${{ inputs.arquivos }}
+        MIN_FLESCH: ${{ inputs.min-flesch }}
+        FALHAR_EM: ${{ inputs.falhar-em }}
+        IGNORAR: ${{ inputs.ignorar }}
+      run: |
+        shopt -s globstar nullglob
+        args=(--falhar-em "$FALHAR_EM" --ignorar "$IGNORAR" --sem-cor)
+        if [ -n "$MIN_FLESCH" ]; then args+=(--min-flesch "$MIN_FLESCH"); fi
+        # shellcheck disable=SC2086  # o glob precisa ser expandido
+        legivel $ARQUIVOS "${args[@]}"
