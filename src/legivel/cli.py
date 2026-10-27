@@ -1,4 +1,4 @@
-"""Linha de comando: ``legivel arquivo.md``."""
+"""Linha de comando: mudar ``legivel arquivo.md``."""
 
 from __future__ import annotations
 
